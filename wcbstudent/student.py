@@ -1,26 +1,27 @@
 """
+Implementation of the Student class
+The class provides all necessary functionality to do automated
+vocabulary practice.
 """
 
-import csv
 import os
 import random
 import time
 
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from msedge.selenium_tools import Edge, EdgeOptions
 
 from config import *
+from browser import init_browser
+from vocabulary import Vocabulary
 
 
 class Student:
     def __init__(self) -> None:
-        self.browser = Student.init_browser(PATH_BROWSER, headless=False)
-        self.voc_e = {}
-        self.voc_c = {}
+        self.browser = init_browser(PATH_BROWSER, headless=False)
+        self.vocabulary = Vocabulary(PATH_VOCABULARY)
 
 
     def do_choose_practice(self):
@@ -43,7 +44,7 @@ class Student:
     def do_practice(self, count: int):
         for _ in range(count):
             question = WebDriverWait(self.browser, 20).until(EC.visibility_of_element_located((By.ID, "q_word"))).text
-            answer = self.translate(question)
+            answer = self.vocabulary.translate(question)
             if answer == "":
                 print(f"Not found: {question}")
                 break
@@ -65,29 +66,7 @@ class Student:
             break
 
 
-    @staticmethod
-    def init_browser(driver_path: str, headless: bool = True) -> webdriver:
-        options = EdgeOptions()
-        options.use_chromium = True  # Use the Chromium-based browser, not MSIE
-        options.add_argument("user-data-dir=C:\\Temp")
-        options.add_argument("profile-directory=Profile 1")
-        if headless:
-            options.add_argument('headless')
-            options.add_argument('disable-gpu')
-        return Edge(executable_path=driver_path, options=options)
-
-
-    def load_vocabulary(self, path: str):
-        with open(path, "r", encoding="utf-8", newline='') as f:
-            reader = csv.DictReader(f, delimiter=';')
-            for row in reader:
-                self.voc_e[row["english"]] = row["czech"]
-                self.voc_c[row["czech"]] = row["english"]
-
-
     def run(self):
-        self.load_vocabulary(PATH_VOCABULARY)
-
         self.do_login()
         time.sleep(2)
         self.do_select_class()
@@ -97,11 +76,4 @@ class Student:
         self.do_practice(NUM_ANSWERS)
         time.sleep(2)
         self.do_save_and_exit()
-        time.sleep(5)
-
-
-    def translate(self, question: str) -> str:
-        result = self.voc_e.get(question, "")
-        if result == "":            
-            result = self.voc_c.get(question, "")
-        return result 
+        time.sleep(5)   # Wait to let the user read the results
