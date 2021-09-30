@@ -22,6 +22,7 @@ def init_browser(driver_path: str, headless: bool = True) -> webdriver:
     options.add_argument("user-data-dir=C:\\Temp")
     options.add_argument("profile-directory=Profile 1")
     if headless:
-        options.add_argument('headless')
-        options.add_argument('disable-gpu')
+        options.add_argument("headless")
+        options.add_argument("disable-gpu")
+        options.add_argument("disable-software-rasterizer")
     return Edge(executable_path=driver_path, options=options)
