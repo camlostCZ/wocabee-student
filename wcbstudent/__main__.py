@@ -1,6 +1,6 @@
 import sys
 
-from selenium.common.exceptions import SessionNotCreatedException
+from selenium.common.exceptions import SessionNotCreatedException, WebDriverException
 from student import Student
 
 try:
@@ -8,7 +8,6 @@ try:
     app.run()
 except FileNotFoundError:
     print("Error: Vocabulary not found.", file=sys.stderr)
-except SessionNotCreatedException:
-    print("Error: Web browser driver not found. Download correct version:\n"
-        "https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/",
+except (SessionNotCreatedException, WebDriverException) as e:
+    print(f"Error: Web browser driver not found.\n {e}",
         file=sys.stderr)
